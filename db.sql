@@ -1,0 +1,18 @@
+CREATE DATABASE IF NOT EXISTS murhaf_app
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+CREATE USER IF NOT EXISTS 'app_user'@'%' IDENTIFIED BY 'app_password';
+
+GRANT ALL PRIVILEGES ON murhaf_app.* TO 'app_user'@'%';
+
+FLUSH PRIVILEGES;
+
+USE murhaf_app;
+
+CREATE TABLE IF NOT EXISTS notes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
