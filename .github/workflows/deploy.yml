@@ -20,7 +20,7 @@ jobs:
         run: docker build -t ${{ secrets.DOCKERHUB_USER }}/${{ secrets.IMAGE_NAME }}:latest .
 
       - name: Push Docker image
-        run: docker push ${{ secrets.DOCKERHUB_USER }}/${{ secrets.IMAGE_NAME }}:latest }
+        run: docker push ${{ secrets.DOCKERHUB_USER }}/${{ secrets.IMAGE_NAME }}:latest
 
       - name: Deploy to DB server
         run: |
