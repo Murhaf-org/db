@@ -1,0 +1,37 @@
+name: Deploy Database to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: [self-hosted, Linux, X64]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to DockerHub
+        run: docker login -u ${{ secrets.DOCKERHUB_USER }} -p ${{ secrets.DOCKERHUB_PASS }}
+
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKERHUB_USER }}/${{ secrets.IMAGE_NAME }}:latest .
+
+      - name: Push Docker image
+        run: docker push ${{ secrets.DOCKERHUB_USER }}/${{ secrets.IMAGE_NAME }}:latest }
+
+      - name: Deploy to DB server
+        run: |
+          ssh -o StrictHostKeyChecking=no ec2-user@${{ secrets.DB_IP }} "
+            sudo docker login -u ${{ secrets.DOCKERHUB_USER }} -p ${{ secrets.DOCKERHUB_PASS }} &&
+            sudo docker pull ${{ secrets.DOCKERHUB_USER }}/${{ secrets.IMAGE_NAME }}:latest &&
+            sudo docker stop ${{ secrets.CONTAINER_NAME }} || true &&
+            sudo docker rm ${{ secrets.CONTAINER_NAME }} || true &&
+            sudo docker run -d \
+              --name ${{ secrets.CONTAINER_NAME }} \
+              -p ${{ secrets.PORT }}:${{ secrets.CONTAINER_PORT }} \
+              -v mysql_data:/var/lib/mysql \
+              ${{ secrets.DOCKERHUB_USER }}/${{ secrets.IMAGE_NAME }}:latest
+          "
